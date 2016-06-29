@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"serial"
+	"strings"
 	"time"
 )
 
@@ -14,8 +17,8 @@ func read(s *serial.Port) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return string(buf[:n])
-
+	return string(buf[:])
+	fmt.Printf("%q", buf[:])
 }
 
 func write(s *serial.Port) {
@@ -46,5 +49,15 @@ func main() {
 
 	write(s)
 	time.Sleep(time.Second * 1)
-	read(s)
+	weight := read(s)
+	//Opening file and creating a writer
+	logFile, err := os.Open("C:/Desktop/BalanceLog.txt")
+	check(err)
+	dataSlice := ""
+	dataSlice += time.Now().String()
+	dataSlice += "\n"
+	dataSlice += weight
+	err := ioutil.WriteFile(logFile, dataSlice, perm)
+	check(err)
+
 }
