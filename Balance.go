@@ -8,7 +8,7 @@ import (
 )
 
 func read(s *serial.Port) string {
-	buf := make([]byte, 128)
+	buf := make([]byte, 17)
 
 	n, err := s.Read(buf)
 	if err != nil {
