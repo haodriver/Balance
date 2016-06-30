@@ -1,12 +1,12 @@
 package main
 
 import (
+	//"bufio"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"serial"
-	"strings"
 	"time"
 )
 
@@ -17,22 +17,22 @@ func read(s *serial.Port) string {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Printf("The Weight is %q", buf[:n])
 	return string(buf[:])
-	fmt.Printf("%q", buf[:])
 }
 
 func write(s *serial.Port) {
 	fmt.Println("Writing Messages")
-	n, err := s.Write([]byte("Q\r\n"))
+	_, err := s.Write([]byte("Q\r\n"))
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(n)
+	//fmt.Println(n)
 }
 
 func main() {
-	fmt.Println("Sending Request for Weight Data")
+	//fmt.Println("Sending Request")
 	c := &serial.Config{Name: "COM3", Baud: 9600, Parity: 'N', StopBits: 1, ReadTimeout: 5000}
 	s, err := serial.OpenPort(c)
 
@@ -42,7 +42,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Opening the Port is successful")
+	fmt.Println("Accessing the balance")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,13 +51,21 @@ func main() {
 	time.Sleep(time.Second * 1)
 	weight := read(s)
 	//Opening file and creating a writer
-	logFile, err := os.Open("C:/Desktop/BalanceLog.txt")
-	check(err)
-	dataSlice := ""
-	dataSlice += time.Now().String()
-	dataSlice += "\n"
-	dataSlice += weight
-	err := ioutil.WriteFile(logFile, dataSlice, perm)
-	check(err)
+	//reader := bufio.NewReader(os.Stdin)
+	fmt.Println("\r\nEnter the Sample ID")
+	var text string
+	fmt.Scanln(&text)
+	filename := ""
+	filename += "Weight of Sample "
+	filename += text
+	filename += ".txt"
+
+	data := ""
+	data += time.Now().String()
+	data += "\r\n"
+	data += weight
+	data += "\r"
+	os.Create(filename)
+	ioutil.WriteFile(filename, []byte(data), 0644)
 
 }
