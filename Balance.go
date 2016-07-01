@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"bufio"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,62 +9,65 @@ import (
 	"time"
 )
 
-func read(s *serial.Port) string {
-	buf := make([]byte, 17)
+/* write
+Takes in an argument of a connected port
+*/
+func WriteMessage(s *serial.Port) {
+	fmt.Println("Writing Messages")
+	_, err := s.Write([]byte("Q\r\n")) // send Q command to request for immediate weight data
+	if err != nil {
+		log.Fatal(err)
+	}
 
+}
+
+/* read
+Takes in an argument of a connected port
+Returns a string of the message that the devices reponds
+*/
+func ReadMessage(s *serial.Port) string {
+	buf := make([]byte, 17)
 	n, err := s.Read(buf)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("The Weight is %q", buf[:n])
+	fmt.Printf("The Weight is %q", buf[:n]) //show the weight result on the terminal screen
 	return string(buf[:])
 }
 
-func write(s *serial.Port) {
-	fmt.Println("Writing Messages")
-	_, err := s.Write([]byte("Q\r\n"))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	//fmt.Println(n)
+/* createFile
+takes in a filename (string) and data (string)
+creates a file with filename and writes data
+*/
+func CreateFile(filename string, data string) {
+	os.Create(filename)
+	ioutil.WriteFile(filename, []byte(data), 0644)
 }
 
 func main() {
 	//fmt.Println("Sending Request")
 	c := &serial.Config{Name: "COM3", Baud: 9600, Parity: 'N', StopBits: 1, ReadTimeout: 5000}
 	s, err := serial.OpenPort(c)
-
-	//fmt.Println(c)
-	if false {
-		fmt.Println(s)
-		log.Fatal(err)
-	}
-
 	fmt.Println("Accessing the balance")
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	write(s)
+	WriteMessage(s)
 	time.Sleep(time.Second * 1)
-	weight := read(s)
-	//Opening file and creating a writer
-	//reader := bufio.NewReader(os.Stdin)
+	weight := ReadMessage(s)
+
+	//Ask user input for the Sample ID
 	fmt.Println("\r\nEnter the Sample ID")
 	var text string
 	fmt.Scanln(&text)
-	filename := ""
-	filename += "Weight of Sample "
+	filename := "Weight of Sample "
 	filename += text
 	filename += ".txt"
-
-	data := ""
-	data += time.Now().String()
+	data := time.Now().String()
 	data += "\r\n"
 	data += weight
 	data += "\r"
-	os.Create(filename)
-	ioutil.WriteFile(filename, []byte(data), 0644)
+
+	CreateFile(filename, data)
 
 }
