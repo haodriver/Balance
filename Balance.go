@@ -18,7 +18,7 @@ func WriteMessage(s *serial.Port, inputCommand string) string {
 		return "Empty Command"
 	}
 	length := len(inputCommand)
-	if inputCommand[(length-4):length] != "\n\r" || length < 5 {
+	if inputCommand[(length-2):length] != "\n\r" || length < 3 {
 		return "No <cr> and <lf> at the end of the command"
 	}
 
