@@ -12,12 +12,22 @@ import (
 /* write
 Takes in an argument of a connected port
 */
-func WriteMessage(s *serial.Port) {
+func WriteMessage(s *serial.Port, inputCommand string) string {
 	fmt.Println("Writing Messages")
-	_, err := s.Write([]byte("Q\r\n")) // send Q command to request for immediate weight data
+	if inputCommand == "" {
+		return "Empty Command"
+	}
+	length := len(inputCommand)
+	if inputCommand[(length-4):length] != "\n\r" || length < 5 {
+		return "No <cr> and <lf> at the end of the command"
+	}
+
+	_, err := s.Write([]byte(inputCommand))
+	// send Q command to request for immediate weight data
 	if err != nil {
 		log.Fatal(err)
 	}
+	return "Writing Successful"
 
 }
 
@@ -31,7 +41,8 @@ func ReadMessage(s *serial.Port) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("The Weight is %q", buf[:n]) //show the weight result on the terminal screen
+	fmt.Printf("The Weight is %q", buf[:n])
+	//show the weight result on the terminal screen
 	return string(buf[:])
 }
 
@@ -52,7 +63,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	WriteMessage(s)
+	WriteMessage(s, "Q\r\n")
+	//According to the device manual
+	//Q\r\n is used as a command for immediate weight data
 	time.Sleep(time.Second * 1)
 	weight := ReadMessage(s)
 
