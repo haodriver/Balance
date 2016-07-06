@@ -18,7 +18,7 @@ func WriteMessage(s *serial.Port, inputCommand string) string {
 		return "Empty Command"
 	}
 	length := len(inputCommand)
-	if inputCommand[(length-2):length] != "\n\r" || length < 3 {
+	if inputCommand[(length-2):length] != "\r\n" || length < 3 {
 		return "No <cr> and <lf> at the end of the command"
 	}
 
@@ -66,7 +66,8 @@ func main() {
 	WriteMessage(s, "Q\r\n")
 	//According to the device manual
 	//Q\r\n is used as a command for immediate weight data
-	time.Sleep(time.Second * 1)
+	//Change from 1 second - 30 seconds
+	time.Sleep(time.Second * 30)
 	weight := ReadMessage(s)
 
 	//Ask user input for the Sample ID

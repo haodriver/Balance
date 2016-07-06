@@ -2,21 +2,30 @@ package main
 
 import (
 	//"github.com/stretchr/testify/mock"
-	"os"
+	//"os"
+	"github.com/stretchr/testify/mock"
 	"serial"
 	"testing"
+	//"Balance"
+	//"github.com/golang/mock/gomock"
 )
 
 /* Test WriteMessage
  */
+type MyInterface interface {
+	WriteMessage(s, inputCommand)
+}
 
-func TestWriteMessage(t *testing.T) string {
+func (m *MyInterface) name() {
+
+}
+
+func TestWriteMessageEmptyCommand(t *testing.T) string {
 	/*
 		basic_test.go catches emtpy/inaccessble port
 	*/
 
-	port0 := os.Getenv("PORT0")
-	c0 := &serial.Config{Name: port0, Baud: 9600}
+	c0 := &serial.Config{Name: "Port1", Baud: 9600}
 	s0, err := serial.OpenPort(c0)
 	if err != nil {
 		t.Fatal(err)
@@ -26,14 +35,29 @@ func TestWriteMessage(t *testing.T) string {
 	if WriteMessage(s0, "") != "Empty Command" {
 		return "missing empty command case"
 	}
+
+	return "Empty Message Test Success"
+	// test case of writing a proper message
+
+}
+
+/* func TestWriteMessageShortCommand(t *testing.T) string {
 	// test case of writing a message without proper <cr>
 	if WriteMessage(s0, "Q") != "No <cr> and <lf> at the end of the command" {
 		return "missing incomplete command case "
 	}
-	return "YAYYYY"
-	// test case of writing a proper message
-
+	return "Incomplet Message Test Success"
 }
+
+func TestWriteMessageComplete(t *testing.T) string {
+	if WriteMessage(s0, "Q\r\n") != "Writing Successful" {
+		return "Error in Connection"
+	}
+	return "Full Message Test Success"
+}
+*/
+
+//func TestReadMessage
 
 //func TestReadMessage(t *testing.T) {
 
