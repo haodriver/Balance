@@ -4,32 +4,54 @@ import (
 	//"github.com/stretchr/testify/mock"
 	//"os"
 	"github.com/stretchr/testify/mock"
-	"serial"
+	"os"
+	//"serial"
+	//"sync"
+	//"fmt"
+	//"log"
+	"syscall"
 	"testing"
 	//"Balance"
 	//"github.com/golang/mock/gomock"
 )
 
-/* Test WriteMessage
+/* Make a mock serial.port
  */
-type MyInterface interface {
-	WriteMessage(s, inputCommand)
+type MockPort struct {
+	mock.Mock
+	f *os.File
 }
 
-func (m *MyInterface) name() {
-
+// define the argument and return messages of this port mock
+func (p *MockPort) Close() error {
+	return p.f.Close()
 }
+func (p *MockPort) Write(command []byte) (n int, err error) {
+	return p.f.Write(command)
+}
+func (p *MockPort) Read(buf []byte) (n int, err error) {
+	return p.f.Read(buf)
+}
+func (p *MockPort) Flush() error {
+	const TCFLSH = 0x540B
+	_, _, err := syscall.Syscall(
+		syscall.SYS_IOCTL,
+		uintptr(p.f.Fd()),
+		uintptr(TCFLSH),
+		uintptr(syscall.TCIOFLUSH),
+	)
+	return err
+}
+
+//------------------------------------------------
 
 func TestWriteMessageEmptyCommand(t *testing.T) string {
 	/*
 		basic_test.go catches emtpy/inaccessble port
 	*/
 
-	c0 := &serial.Config{Name: "Port1", Baud: 9600}
-	s0, err := serial.OpenPort(c0)
-	if err != nil {
-		t.Fatal(err)
-	}
+	s0 := new(MockPort)
+	s0.On("Write", []byte("")).Return(1, nil)
 
 	// test case of writing an empty message
 	if WriteMessage(s0, "") != "Empty Command" {

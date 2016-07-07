@@ -67,7 +67,7 @@ func main() {
 	//According to the device manual
 	//Q\r\n is used as a command for immediate weight data
 	//Change from 1 second - 30 seconds
-	time.Sleep(time.Second * 30)
+	time.Sleep(time.Second * 1)
 	weight := ReadMessage(s)
 
 	//Ask user input for the Sample ID
