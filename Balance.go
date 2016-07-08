@@ -38,7 +38,6 @@ func WriteMessage(s port, inputCommand string) string {
 
 	command := []byte(inputCommand)
 	_, err := s.Write(command)
-	fmt.Println("yolo")
 	// send Q command to request for immediate weight data
 	if err != nil {
 		log.Fatal(err)
