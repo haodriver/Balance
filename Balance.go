@@ -9,20 +9,36 @@ import (
 	"time"
 )
 
+type port interface {
+	Write(b []byte) (n int, err error)
+	Read(b []byte) (n int, err error)
+	Flush() (err error)
+	Close() (err error)
+}
+
 /* write
 Takes in an argument of a connected port
 */
-func WriteMessage(s *serial.Port, inputCommand string) string {
+
+// check if s needs to be a pointer
+func WriteMessage(s port, inputCommand string) string {
 	fmt.Println("Writing Messages")
 	if inputCommand == "" {
 		return "Empty Command"
 	}
 	length := len(inputCommand)
-	if inputCommand[(length-2):length] != "\r\n" || length < 3 {
+	if length >= 3 {
+		if inputCommand[(length-2):length] != "\r\n" {
+			return "No <cr> and <lf> at the end of the command"
+		}
+	}
+	if length < 3 {
 		return "No <cr> and <lf> at the end of the command"
 	}
 
-	_, err := s.Write([]byte(inputCommand))
+	command := []byte(inputCommand)
+	_, err := s.Write(command)
+	fmt.Println("yolo")
 	// send Q command to request for immediate weight data
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +51,7 @@ func WriteMessage(s *serial.Port, inputCommand string) string {
 Takes in an argument of a connected port
 Returns a string of the message that the devices reponds
 */
-func ReadMessage(s *serial.Port) string {
+func ReadMessage(s port) string {
 	buf := make([]byte, 17)
 	n, err := s.Read(buf)
 	if err != nil {
