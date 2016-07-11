@@ -12,8 +12,6 @@ import (
 type port interface {
 	Write(b []byte) (n int, err error)
 	Read(b []byte) (n int, err error)
-	Flush() (err error)
-	Close() (err error)
 }
 
 /* write
@@ -26,6 +24,7 @@ func WriteMessage(s port, inputCommand string) string {
 	if inputCommand == "" {
 		return "Empty Command"
 	}
+
 	length := len(inputCommand)
 	if length >= 3 {
 		if inputCommand[(length-2):length] != "\r\n" {
@@ -38,7 +37,6 @@ func WriteMessage(s port, inputCommand string) string {
 
 	command := []byte(inputCommand)
 	_, err := s.Write(command)
-	fmt.Println("yolo")
 	// send Q command to request for immediate weight data
 	if err != nil {
 		log.Fatal(err)
@@ -66,9 +64,20 @@ func ReadMessage(s port) string {
 takes in a filename (string) and data (string)
 creates a file with filename and writes data
 */
-func CreateFile(filename string, data string) {
+func CreateFile(text string, weight string) string {
+	if text == "" {
+		return "Re-enter the sample ID"
+	}
+	filename := "Weight of Sample "
+	filename += text
+	filename += ".txt"
+	data := time.Now().String()
+	data += "\r\n"
+	data += weight
+	data += "\r"
 	os.Create(filename)
 	ioutil.WriteFile(filename, []byte(data), 0644)
+	return "Writing File Successful"
 }
 
 func main() {
@@ -90,14 +99,7 @@ func main() {
 	fmt.Println("\r\nEnter the Sample ID")
 	var text string
 	fmt.Scanln(&text)
-	filename := "Weight of Sample "
-	filename += text
-	filename += ".txt"
-	data := time.Now().String()
-	data += "\r\n"
-	data += weight
-	data += "\r"
 
-	CreateFile(filename, data)
+	CreateFile(text, weight)
 
 }

@@ -15,7 +15,7 @@ import (
 	//"github.com/golang/mock/gomock"
 )
 
-/* Make a mock serial.port
+/* Make a mock serial.port and add qualifying interfaces
  */
 type MockPort struct {
 	mock.Mock
@@ -32,14 +32,8 @@ func (s0 MockPort) Read(b []byte) (n int, err error) {
 	args := s0.Called(b)
 	return args.Int(0), args.Error(1)
 }
-func (s0 MockPort) Flush() (err error) {
-	return s0.Flush()
-}
-func (s0 MockPort) Close() (err error) {
-	return s0.Close()
-}
 
-//------------------------------------------------
+//------------------Test Write Message Cases-----------------------
 
 func TestWriteMessageEmptyCommand(t *testing.T) {
 	/*
@@ -52,7 +46,6 @@ func TestWriteMessageEmptyCommand(t *testing.T) {
 	if WriteMessage(s0, "") != "Empty Command" {
 		t.Error("Failed empty command case")
 	}
-	// test case of writing a proper message
 }
 
 func TestWriteMessageShortCommand(t *testing.T) {
@@ -74,8 +67,11 @@ func TestWriteMessageComplete(t *testing.T) {
 
 }
 
-//func TestReadMessage
-
-//func TestReadMessage(t *testing.T) {
-
-//}
+//------------------Test Create File--------------
+func TestCreateEmptyFile(t *testing.T) {
+	filename := ""
+	data := ""
+	if CreateFile(filename, data) != "Re-enter the sample ID" {
+		t.Error("Missing empty filename case")
+	}
+}
